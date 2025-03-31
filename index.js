@@ -2,8 +2,9 @@ const { createClient } = require("@supabase/supabase-js");
 
 console.log("✅ Supabase MCP Server Starting...");
 
-// Parse --config JSON from args
-const configArg = process.argv.find(arg => arg.startsWith("{") && arg.includes("supabaseProjectRef"));
+// Parse --config JSON from args or fallback for local dev
+const configArg = process.argv.find(arg => arg.startsWith("{") && arg.includes("supabaseProjectRef")) || process.env.LOCAL_MCP_CONFIG;
+
 let config = {};
 try {
   config = JSON.parse(configArg);
@@ -22,7 +23,6 @@ if (!supabaseProjectRef || !supabaseServiceRoleKey) {
 const SUPABASE_URL = `https://${supabaseProjectRef}.supabase.co`;
 const supabase = createClient(SUPABASE_URL, supabaseServiceRoleKey);
 
-// ✅ Return tools via async function
 exports.default = async () => {
   console.log("🛠 Exporting tools...");
   return {
@@ -42,7 +42,7 @@ exports.default = async () => {
         params: {
           name: "string",
           description: "string",
-          owner_id: "string",
+          owner_id: "string"
         },
         run: async ({ name, description, owner_id }) => {
           const { data, error } = await supabase
